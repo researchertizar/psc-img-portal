@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#0f172a"/>
+  <rect x="40" y="40" width="1120" height="550" rx="20" fill="#1e293b" stroke="#334155" stroke-width="4"/>
+  <rect x="80" y="80" width="60" height="60" rx="12" fill="#1e40af"/>
+  <path d="M96 102 h28 v28 h-28 z" fill="none" stroke="#f59e0b" stroke-width="4"/>
+  <text x="160" y="122" font-family="-apple-system, BlinkMacSystemFont, Arial, sans-serif" font-weight="800" font-size="42" fill="#ffffff">PSC Image Studio</text>
+  <text x="80" y="240" font-family="-apple-system, BlinkMacSystemFont, Arial, sans-serif" font-weight="800" font-size="46" fill="#ffffff">Kerala PSC Photo &amp; Signature Resizer</text>
+  <text x="80" y="310" font-family="-apple-system, BlinkMacSystemFont, Arial, sans-serif" font-weight="600" font-size="28" fill="#94a3b8">Photo 150×200 (Name &amp; Date) • Signature 150×100 • ≤ 30 KB</text>
+  <rect x="80" y="380" width="460" height="64" rx="32" fill="#059669"/>
+  <text x="120" y="422" font-family="-apple-system, BlinkMacSystemFont, Arial, sans-serif" font-weight="700" font-size="24" fill="#ffffff">✓ 100% Free &amp; Offline Browser Tool</text>
+</svg>
