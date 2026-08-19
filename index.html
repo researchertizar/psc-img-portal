@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>PSC Image Studio - Kerala PSC Photo & Signature Resizer</title>
+  <meta name="description" content="Official Kerala PSC Image Processing Portal. Resize photo to 150x200 with Candidate Name & Date taken, and signature to 150x100 under 30 KB.">
+  <meta name="theme-color" content="#0f172a">
+  
+  <!-- OpenGraph Metadata -->
+  <meta property="og:title" content="PSC Image Studio - Kerala PSC Photo & Signature Resizer">
+  <meta property="og:description" content="100% Free & Offline Kerala PSC Image Tool. Format photos to 150x200 and signatures to 150x100 under 30 KB.">
+  <meta property="og:type" content="website">
+  
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="manifest.json">
+
+  <!-- SVG Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%230f172a%22/><path d=%22M30 35 h40 v35 h-40 z%22 fill=%22none%22 stroke=%22%23f59e0b%22 stroke-width=%225%22/><circle cx=%2250%22 cy=%2252.5%22 r=%2210%22 fill=%22%233b82f6%22/></svg>">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-theme="light">
+
+  <!-- App Header -->
+  <header class="app-topbar" role="banner">
+    <div class="brand-wrapper">
+      <svg class="logo-svg" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="PSC Studio Logo">
+        <rect width="44" height="44" rx="10" fill="#1E40AF"/>
+        <path d="M12 16C12 14.8954 12.8954 14 14 14H18L20 11H24L26 14H30C31.1046 14 32 14.8954 32 16V30C32 31.1046 31.1046 32 30 32H14C12.8954 32 12 31.1046 12 30V16Z" fill="#F8FAFC"/>
+        <circle cx="22" cy="23" r="6" fill="#0F172A"/>
+        <circle cx="22" cy="23" r="3" fill="#F59E0B"/>
+      </svg>
+      <div class="brand-info">
+        <h1 class="brand-name">PSC Image Studio</h1>
+      </div>
+    </div>
+    
+    <div class="topbar-right">
+      <button id="themeToggleBtn" class="theme-btn" title="Toggle Light/Dark Theme" aria-label="Toggle Theme">
+        <span id="themeIcon" aria-hidden="true">🌙</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- App Body -->
+  <div class="app-shell" role="main">
+
+    <!-- Nav Switcher -->
+    <nav class="segmented-nav" role="tablist" aria-label="Processing Mode">
+      <button id="tabPhotoBtn" class="tab-trigger active" role="tab" aria-selected="true" aria-controls="photoSection">
+        📷 Photo (150 × 200)
+      </button>
+      <button id="tabSigBtn" class="tab-trigger" role="tab" aria-selected="false" aria-controls="sigSection">
+        ✍️ Signature (150 × 100)
+      </button>
+    </nav>
+
+    <!-- PANE 1: PHOTOGRAPH -->
+    <section id="photoSection" class="pane active" role="tabpanel" aria-labelledby="tabPhotoBtn">
+      
+      <!-- Left Card: Controls -->
+      <div class="card">
+        
+        <!-- Upload Dropzone -->
+        <div id="photoDropzone" class="dropzone" tabindex="0" role="button" aria-label="Upload Photo File">
+          <div class="dropzone-icon">📷</div>
+          <div class="dropzone-title">Upload Photo</div>
+          <button type="button" id="loadSamplePhotoBtn" class="sample-link">or try sample photo</button>
+          <input type="file" id="photoFileInput" class="hidden" accept="image/*">
+        </div>
+
+        <!-- Cropper View Box -->
+        <div id="cropperWrapperPhoto" class="cropper-box hidden">
+          <img id="photoCropperImg" alt="Photo crop view">
+        </div>
+
+        <div id="photoToolbar" class="cropper-toolbar hidden">
+          <button id="changePhotoBtn" class="btn-outline" style="flex:1;" aria-label="Change Image">📁 Change</button>
+          <button id="photoRotateBtn" class="btn-outline" aria-label="Rotate 90 Degrees">🔄 Rotate 90°</button>
+        </div>
+
+        <!-- Inputs Grid -->
+        <div class="input-grid">
+          <div class="field">
+            <label for="candidateName" class="field-label">Candidate Name</label>
+            <input type="text" id="candidateName" class="field-input" value="DANISH" placeholder="ENTER NAME" maxlength="32">
+          </div>
+          <div class="field">
+            <label for="dateTaken" class="field-label">Date Taken</label>
+            <input type="date" id="dateTaken" class="field-input">
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Card: Output Preview -->
+      <div class="preview-card">
+        <div class="preview-header">Output Preview</div>
+
+        <div id="photoCanvasFrame" class="canvas-frame">
+          <canvas id="photoPreviewCanvas" width="150" height="200" aria-label="Photo Result Canvas"></canvas>
+        </div>
+
+        <div id="photoStatusBadge" class="badge-status" role="status">
+          ✓ PSC Compliant (Under 30 KB)
+        </div>
+
+        <div class="metrics-box">
+          <div class="metric-row">
+            <span class="metric-key">Resolution</span>
+            <span class="metric-val">150 × 200 px</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-key">File Size</span>
+            <span id="photoSizeBadge" class="metric-val">-- KB</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-key">Format</span>
+            <span class="metric-val">JPG</span>
+          </div>
+        </div>
+
+        <button id="desktopDownloadPhotoBtn" class="btn-download desktop-download-btn">
+          ⬇ Download JPG
+        </button>
+      </div>
+
+    </section>
+
+    <!-- PANE 2: SIGNATURE -->
+    <section id="sigSection" class="pane" role="tabpanel" aria-labelledby="tabSigBtn">
+      
+      <!-- Left Card: Controls -->
+      <div class="card">
+        
+        <!-- Upload Dropzone -->
+        <div id="sigDropzone" class="dropzone" tabindex="0" role="button" aria-label="Upload Signature File">
+          <div class="dropzone-icon">✍️</div>
+          <div class="dropzone-title">Upload Signature</div>
+          <button type="button" id="loadSampleSigBtn" class="sample-link">or try sample signature</button>
+          <input type="file" id="sigFileInput" class="hidden" accept="image/*">
+        </div>
+
+        <!-- Cropper View Box -->
+        <div id="cropperWrapperSig" class="cropper-box hidden">
+          <img id="sigCropperImg" alt="Signature crop view">
+        </div>
+
+        <div id="sigToolbar" class="cropper-toolbar hidden">
+          <button id="changeSigBtn" class="btn-outline" style="flex:1;" aria-label="Change Image">📁 Change</button>
+          <button id="sigRotateBtn" class="btn-outline" aria-label="Rotate 90 Degrees">🔄 Rotate 90°</button>
+        </div>
+
+        <!-- Paper Contrast Slider -->
+        <div class="field">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <label for="sigContrastSlider" class="field-label">Paper Background Cleanup</label>
+            <span id="sigContrastVal" class="field-label" style="color:var(--primary);">0%</span>
+          </div>
+          <input type="range" id="sigContrastSlider" min="0" max="100" value="0" style="height:36px; accent-color:var(--primary);" aria-label="Paper Background Cleanup">
+        </div>
+
+      </div>
+
+      <!-- Right Card: Output Preview -->
+      <div class="preview-card">
+        <div class="preview-header">Output Preview</div>
+
+        <div id="sigCanvasFrame" class="canvas-frame">
+          <canvas id="sigPreviewCanvas" width="150" height="100" aria-label="Signature Result Canvas"></canvas>
+        </div>
+
+        <div id="sigStatusBadge" class="badge-status" role="status">
+          ✓ PSC Compliant (Under 30 KB)
+        </div>
+
+        <div class="metrics-box">
+          <div class="metric-row">
+            <span class="metric-key">Resolution</span>
+            <span class="metric-val">150 × 100 px</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-key">File Size</span>
+            <span id="sigSizeBadge" class="metric-val">-- KB</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-key">Format</span>
+            <span class="metric-val">JPG</span>
+          </div>
+        </div>
+
+        <button id="desktopDownloadSigBtn" class="btn-download desktop-download-btn">
+          ⬇ Download JPG
+        </button>
+      </div>
+
+    </section>
+
+  </div>
+
+  <!-- Mobile Sticky Download Bar (<768px) -->
+  <div class="mobile-sticky-bar">
+    <button id="mobileDownloadPhotoBtn" class="btn-download">
+      ⬇ Download JPG
+    </button>
+    <button id="mobileDownloadSigBtn" class="btn-download hidden">
+      ⬇ Download JPG
+    </button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="js/canvas-processor.js"></script>
+  <script src="js/compressor.js"></script>
+  <script src="js/cropper-handler.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
