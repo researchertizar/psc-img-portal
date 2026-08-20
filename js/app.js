@@ -1,6 +1,6 @@
 /**
- * PSC Image Studio - Enterprise Engine
- * Service Worker Registration, File Validation Guards & Accessibility Event Controller
+ * PSC Image Studio - Enterprise Engine & Comprehensive Event Analytics
+ * Service Worker Registration, User Interaction Tracking, File Validation Guards
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -12,6 +12,16 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
   }
+
+  // --- ANALYTICS HELPER ---
+  function trackEvent(eventName, params = {}) {
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', eventName, params);
+    }
+  }
+
+  // Track Page View / Engine Init
+  trackEvent('app_initialized', { timestamp: new Date().toISOString() });
 
   // Theme Toggle Elements
   const themeToggleBtn = document.getElementById('themeToggleBtn');
@@ -84,6 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
       applyTheme(nextTheme);
       localStorage.setItem('psc_studio_theme', nextTheme);
+      trackEvent('theme_toggle', { theme: nextTheme });
     });
   }
 
@@ -107,6 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
     mobileDownloadPhotoBtn.classList.remove('hidden');
     mobileDownloadSigBtn.classList.add('hidden');
 
+    trackEvent('tab_switch', { tab: 'photo' });
     updatePhotoPreview();
   });
 
@@ -122,23 +134,30 @@ document.addEventListener('DOMContentLoaded', () => {
     mobileDownloadSigBtn.classList.remove('hidden');
     mobileDownloadPhotoBtn.classList.add('hidden');
 
+    trackEvent('tab_switch', { tab: 'signature' });
     updateSigPreview();
   });
 
   // --- 3. PHOTO UPLOAD & RENDER ---
-  setupDropzone(photoDropzone, photoFileInput, (img) => {
+  setupDropzone(photoDropzone, photoFileInput, (img, fileInfo) => {
+    trackEvent('photo_upload', {
+      file_size_kb: fileInfo ? Math.round(fileInfo.size / 1024) : 0,
+      file_type: fileInfo ? fileInfo.type : 'sample'
+    });
     loadPhotoSource(img);
   });
 
   if (loadSamplePhotoBtn) {
     loadSamplePhotoBtn.addEventListener('click', (e) => {
       e.stopPropagation();
+      trackEvent('sample_photo_load');
       generateSamplePhoto((img) => loadPhotoSource(img));
     });
   }
 
   if (changePhotoBtn) {
     changePhotoBtn.addEventListener('click', () => {
+      trackEvent('photo_change_click');
       photoFileInput.click();
     });
   }
@@ -157,11 +176,19 @@ document.addEventListener('DOMContentLoaded', () => {
     updatePhotoPreview();
   }
 
-  candidateNameInput.addEventListener('input', () => updatePhotoPreview());
-  dateTakenInput.addEventListener('change', () => updatePhotoPreview());
+  candidateNameInput.addEventListener('input', () => {
+    trackEvent('candidate_name_input', { name_length: candidateNameInput.value.length });
+    updatePhotoPreview();
+  });
+  
+  dateTakenInput.addEventListener('change', () => {
+    trackEvent('date_taken_change', { date: dateTakenInput.value });
+    updatePhotoPreview();
+  });
 
   if (photoRotateBtn) {
     photoRotateBtn.addEventListener('click', () => {
+      trackEvent('photo_rotate', { angle: 90 });
       CropperManager.rotatePhoto(90);
       updatePhotoPreview();
     });
@@ -204,19 +231,25 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --- 4. SIGNATURE UPLOAD & RENDER ---
-  setupDropzone(sigDropzone, sigFileInput, (img) => {
+  setupDropzone(sigDropzone, sigFileInput, (img, fileInfo) => {
+    trackEvent('signature_upload', {
+      file_size_kb: fileInfo ? Math.round(fileInfo.size / 1024) : 0,
+      file_type: fileInfo ? fileInfo.type : 'sample'
+    });
     loadSigSource(img);
   });
 
   if (loadSampleSigBtn) {
     loadSampleSigBtn.addEventListener('click', (e) => {
       e.stopPropagation();
+      trackEvent('sample_signature_load');
       generateSampleSignature((img) => loadSigSource(img));
     });
   }
 
   if (changeSigBtn) {
     changeSigBtn.addEventListener('click', () => {
+      trackEvent('signature_change_click');
       sigFileInput.click();
     });
   }
@@ -236,12 +269,15 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   sigContrastSlider.addEventListener('input', (e) => {
-    sigContrastVal.textContent = `${e.target.value}%`;
+    const val = parseInt(e.target.value, 10);
+    sigContrastVal.textContent = `${val}%`;
+    trackEvent('signature_contrast_change', { contrast_percent: val });
     updateSigPreview();
   });
 
   if (sigRotateBtn) {
     sigRotateBtn.addEventListener('click', () => {
+      trackEvent('signature_rotate', { angle: 90 });
       CropperManager.rotateSignature(90);
       updateSigPreview();
     });
@@ -290,31 +326,39 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --- 5. DOWNLOAD ACTIONS (Mobile & Desktop) ---
-  const handlePhotoDownload = () => {
+  const handlePhotoDownload = (device) => {
     if (!currentPhotoBlob || currentPhotoBlob.size === 0) {
       alert('Please upload or select a photo first!');
       return;
     }
+    trackEvent('photo_download', {
+      device: device,
+      file_size_kb: Math.round(currentPhotoBlob.size / 1024)
+    });
     const rawName = candidateNameInput.value.trim() || 'Candidate';
     const cleanName = rawName.replace(/[^a-zA-Z0-9]/g, '_');
     triggerDownload(currentPhotoBlob, `Kerala_PSC_Photo_${cleanName}.jpg`);
   };
 
-  const handleSigDownload = () => {
+  const handleSigDownload = (device) => {
     if (!currentSigBlob || currentSigBlob.size === 0) {
       alert('Please upload or select a signature first!');
       return;
     }
+    trackEvent('signature_download', {
+      device: device,
+      file_size_kb: Math.round(currentSigBlob.size / 1024)
+    });
     const rawName = candidateNameInput.value.trim() || 'Candidate';
     const cleanName = rawName.replace(/[^a-zA-Z0-9]/g, '_');
     triggerDownload(currentSigBlob, `Kerala_PSC_Signature_${cleanName}.jpg`);
   };
 
-  mobileDownloadPhotoBtn.addEventListener('click', handlePhotoDownload);
-  desktopDownloadPhotoBtn.addEventListener('click', handlePhotoDownload);
+  mobileDownloadPhotoBtn.addEventListener('click', () => handlePhotoDownload('mobile'));
+  desktopDownloadPhotoBtn.addEventListener('click', () => handlePhotoDownload('desktop'));
 
-  mobileDownloadSigBtn.addEventListener('click', handleSigDownload);
-  desktopDownloadSigBtn.addEventListener('click', handleSigDownload);
+  mobileDownloadSigBtn.addEventListener('click', () => handleSigDownload('mobile'));
+  desktopDownloadSigBtn.addEventListener('click', () => handleSigDownload('desktop'));
 
   function triggerDownload(blob, filename) {
     const url = URL.createObjectURL(blob);
@@ -390,7 +434,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const reader = new FileReader();
     reader.onload = (event) => {
       const img = new Image();
-      img.onload = () => callback(img);
+      img.onload = () => callback(img, file);
       img.onerror = () => alert('Unable to load image. File may be corrupted.');
       img.src = event.target.result;
     };
